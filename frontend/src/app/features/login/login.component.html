@@ -1,0 +1,29 @@
+<main class="login" [attr.dir]="langService.lang() === 'ar' ? 'rtl' : 'ltr'">
+  <form (ngSubmit)="login()">
+    <div class="top-bar">
+      <button type="button" class="lang-btn" (click)="langService.toggleLang()">
+        🌐 {{ langService.lang() === 'en' ? 'العربية' : 'English' }}
+      </button>
+    </div>
+
+    <div class="brand">V</div>
+    <h1>{{ langService.t('loginTitle') }}</h1>
+    <p>{{ langService.t('loginSub') }}</p>
+
+    <label>
+      {{ langService.t('lblUsername') }}
+      <input name="username" [(ngModel)]="username" autocomplete="username" />
+    </label>
+
+    <label>
+      {{ langService.t('lblPassword') }}
+      <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" />
+    </label>
+
+    @if (error()) {
+      <div class="error">{{ error() }}</div>
+    }
+
+    <button type="submit">{{ langService.t('btnSignIn') }}</button>
+  </form>
+</main>

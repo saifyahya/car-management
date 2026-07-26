@@ -1,0 +1,4 @@
+export type TicketStatus='CHECKED_IN'|'PARKED'|'REQUESTED'|'ASSIGNED'|'RETRIEVING'|'READY'|'DELIVERED'|'CANCELLED';
+export interface Ticket {id:number;ticketNumber:string;publicToken:string;visitorPhone:string;plateNumber:string;make:string;model:string;color:string;parkingLocation?:string;keyLocation?:string;assignedTo?:string;notes?:string;status:TicketStatus;checkedInAt:string;requestedAt?:string;readyAt?:string;deliveredAt?:string;pickupPin:string;}
+export interface Dashboard {active:number;parked:number;requested:number;retrieving:number;ready:number;delivered:number;}
+export interface CreateTicket {visitorPhone:string;plateNumber:string;make:string;model:string;color:string;parkingLocation:string;keyLocation:string;notes:string;}

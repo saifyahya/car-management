@@ -1,0 +1,41 @@
+<main [attr.dir]="lang() === 'ar' ? 'rtl' : 'ltr'">
+  <div class="lang-switch">
+    <button type="button" class="lang-btn" (click)="toggleLang()">
+      🌐 {{ lang() === 'en' ? 'العربية' : 'English' }}
+    </button>
+  </div>
+
+  @if (ticket(); as t) {
+    <div class="logo">V</div>
+    <p class="eyebrow">{{ translations[lang()].eyebrow }}</p>
+    <h1>{{ t.color }} {{ t.make }} {{ t.model }}</h1>
+    <p class="plate">{{ t.plateNumber }}</p>
+    <app-status-badge [status]="t.status" [customLabel]="getStatusLabel(t.status)" />
+
+    <section>
+      @if (t.status === 'PARKED') {
+        <h2>{{ translations[lang()].parkedTitle }}</h2>
+        <p>{{ translations[lang()].parkedSubtitle }}</p>
+        <button [disabled]="loading()" (click)="request()">
+          {{ loading() ? translations[lang()].requestingBtn : translations[lang()].requestBtn }}
+        </button>
+      } @else if (t.status === 'REQUESTED' || t.status === 'ASSIGNED') {
+        <h2>{{ translations[lang()].requestedTitle }}</h2>
+        <p>{{ translations[lang()].requestedSubtitle }}</p>
+      } @else if (t.status === 'RETRIEVING') {
+        <h2>{{ translations[lang()].retrievingTitle }}</h2>
+        <p>{{ translations[lang()].retrievingSubtitle }}</p>
+      } @else if (t.status === 'READY') {
+        <h2>{{ translations[lang()].readyTitle }}</h2>
+        <p>{{ translations[lang()].readySubtitle }} <strong>{{ t.pickupPin }}</strong></p>
+      } @else if (t.status === 'DELIVERED') {
+        <h2>{{ translations[lang()].deliveredTitle }}</h2>
+        <p>{{ translations[lang()].deliveredSubtitle }}</p>
+      }
+    </section>
+
+    <small>{{ translations[lang()].ticketLabel }} {{ t.ticketNumber }} · {{ translations[lang()].autoRefresh }}</small>
+  } @else {
+    <p>{{ translations[lang()].loadingText }}</p>
+  }
+</main>

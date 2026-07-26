@@ -1,0 +1,21 @@
+<div class="shell" [attr.dir]="langService.lang() === 'ar' ? 'rtl' : 'ltr'">
+  <aside>
+    <div class="brand">
+      <b>{{ langService.t('brandTitle') }}</b>
+      <span>{{ langService.t('brandSubtitle') }}</span>
+    </div>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">{{ langService.t('dashboardNav') }}</a>
+      <a routerLink="/check-in" routerLinkActive="active">{{ langService.t('checkInNav') }}</a>
+    </nav>
+    <div class="aside-footer">
+      <button type="button" class="lang-btn" (click)="langService.toggleLang()">
+        🌐 {{ langService.lang() === 'en' ? 'العربية' : 'English' }}
+      </button>
+      <button type="button" class="signout-btn" (click)="logout()">{{ langService.t('signOut') }}</button>
+    </div>
+  </aside>
+  <main>
+    <router-outlet />
+  </main>
+</div>
