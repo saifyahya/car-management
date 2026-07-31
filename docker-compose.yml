@@ -34,9 +34,12 @@ services:
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
       JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
       APP_SMS_PROVIDER: ${APP_SMS_PROVIDER:-mail}
-      APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL:-http://localhost}
-      APP_MAIL_FROM: ${APP_MAIL_FROM:-noreply@hotelvalet.com}
-
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_SMTP_AUTH: "true"
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
   frontend:
     build:
       context: ./frontend
