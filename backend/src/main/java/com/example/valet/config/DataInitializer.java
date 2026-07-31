@@ -1,6 +1,5 @@
 package com.example.valet.config;
 
-import com.example.valet.entity.Client;
 import com.example.valet.entity.Role;
 import com.example.valet.entity.UserAccount;
 import com.example.valet.repository.ClientRepository;
@@ -11,8 +10,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -33,14 +30,17 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (clientRepository.count() == 0) {
 
-            log.info("Seeding default ADMIN and VALET staff user accounts...");
-            UserAccount admin = new UserAccount();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setRole(Role.ADMIN);
-            admin.setIsActive(true);
-            userRepository.save(admin);
+            if (userRepository.findByUsername("admin").isPresent()) {
 
+                log.info("Seeding default ADMIN and VALET staff user accounts...");
+                UserAccount admin = new UserAccount();
+                admin.setUsername("admin");
+                admin.setPassword(passwordEncoder.encode("admin123"));
+                admin.setRole(Role.ADMIN);
+                admin.setIsActive(true);
+                userRepository.save(admin);
+
+            }
         }
     }
 }

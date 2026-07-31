@@ -26,7 +26,7 @@ export class PublicTicketComponent {
 
   readonly translations = {
     en: {
-      eyebrow: 'HOTEL VALET',
+      eyebrow: 'VALET',
       parkedTitle: 'Ready to leave?',
       parkedSubtitle: 'Request your vehicle before you reach the entrance.',
       requestBtn: 'Request my vehicle',
