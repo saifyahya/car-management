@@ -50,7 +50,7 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="empty-state">No staff users found for your hotel tenant.</td>
+              <td colspan="5" class="empty-state">No staff users found for your tenant.</td>
             </tr>
           }
         </tbody>
@@ -84,7 +84,7 @@
           <span>{{ langService.t('lblRole') }}</span>
           <select [(ngModel)]="formModel.role" name="role">
             <option [value]="'VALET'">VALET (Valet Driver / Staff)</option>
-            <option [value]="'MANAGER'">MANAGER (Hotel Manager)</option>
+            <option [value]="'MANAGER'">MANAGER (Manager)</option>
           </select>
         </label>
 

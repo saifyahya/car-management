@@ -18,8 +18,8 @@ export class LoginComponent {
   private readonly router = inject(Router);
   readonly langService = inject(LanguageService);
 
-  username = 'admin';
-  password = 'admin123';
+  username = '';
+  password = '';
   readonly error = signal('');
   readonly loading = signal(false);
   readonly showPassword = signal(false);
