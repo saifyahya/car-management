@@ -1,48 +1,57 @@
 server:
   port: ${PORT:8080}
+
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
+
   jpa:
     hibernate:
       ddl-auto: none
     open-in-view: false
+
   h2:
     console:
-      enabled: true
+      enabled: false
+
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:465}
-    username: ${GMAIL_USERNAME:saifbarakat991@gmail.com}
-    password: ${GMAIL_APP_PASSWORD:qtruhgoarbzgtihj}
+    port: ${MAIL_PORT:587}
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_APP_PASSWORD}
     properties:
       mail:
         smtp:
-          auth: ${MAIL_SMTP_AUTH:true}
-          ssl:
-            enable: true
-          socketFactory:
-            port: 465
-            class: javax.net.ssl.SSLSocketFactory
+          auth: true
           starttls:
-            enable: false
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
   freemarker:
     template-loader-path: classpath:/templates/email/
     suffix: .ftlh
     charset: UTF-8
-    cache: false
+    cache: true
+
 app:
-  public-base-url: ${PUBLIC_BASE_URL:http://localhost:4200}
+  public-base-url: ${PUBLIC_BASE_URL}
+
   sms:
-    provider: ${SMS_PROVIDER:mail} # Options: mail (default), twilio, log
+    provider: ${SMS_PROVIDER:mail}
+
   mail:
-    from: ${GMAIL_USERNAME:saifbarakat991@gmail.com}
+    from: ${GMAIL_USERNAME}
+
   twilio:
-    account-sid: ${TWILIO_ACCOUNT_SID:YOUR_TWILIO_ACCOUNT_SID}
-    auth-token: ${TWILIO_AUTH_TOKEN:YOUR_TWILIO_AUTH_TOKEN}
-    from-number: ${TWILIO_FROM_NUMBER:YOUR_TWILIO_FROM_NUMBER}
+    account-sid: ${TWILIO_ACCOUNT_SID:}
+    auth-token: ${TWILIO_AUTH_TOKEN:}
+    from-number: ${TWILIO_FROM_NUMBER:}
+
   jwt:
-    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250655368566D5971}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
