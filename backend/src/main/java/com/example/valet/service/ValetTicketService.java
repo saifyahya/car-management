@@ -51,6 +51,14 @@ public class ValetTicketService {
         return t.getVisitorPhone();
     }
 
+    private String buildVisitorRequestUrl(ValetTicket t) {
+        String base = (publicBaseUrl != null && !publicBaseUrl.isBlank()) ? publicBaseUrl.trim().replaceAll("/+$", "") : "http://localhost:4200";
+        if (!base.startsWith("http://") && !base.startsWith("https://")) {
+            base = "http://" + base;
+        }
+        return base + "/v/" + t.getPublicToken();
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public TicketResponse create(CreateTicketRequest r) {
         Long clientId = SecurityUtils.getCurrentClientId();
@@ -81,10 +89,11 @@ public class ValetTicketService {
 
         String recipient = getNotificationRecipient(t);
         if (recipient != null && !recipient.isBlank()) {
+            String requestUrl = buildVisitorRequestUrl(t);
             if (smsGateway instanceof EmailSmsGateway emailGateway) {
-                emailGateway.sendTicketCheckInEmail(t, publicBaseUrl + "/v/" + t.getPublicToken());
+                emailGateway.sendTicketCheckInEmail(t, requestUrl);
             } else {
-                smsGateway.send(recipient, "Welcome. Your valet ticket is " + t.getTicketNumber() + ". Request your vehicle: " + publicBaseUrl + "/v/" + t.getPublicToken() + " Pickup PIN: " + t.getPickupPin());
+                smsGateway.send(recipient, "Welcome. Your valet ticket is " + t.getTicketNumber() + ". Request your vehicle: " + requestUrl + " Pickup PIN: " + t.getPickupPin());
             }
         }
         return TicketResponse.from(t);

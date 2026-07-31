@@ -39,7 +39,7 @@ spring:
     cache: true
 
 app:
-  public-base-url: ${PUBLIC_BASE_URL}
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}
 
   sms:
     provider: ${SMS_PROVIDER:mail}
