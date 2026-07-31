@@ -33,17 +33,14 @@ main {
   font-weight: 700 !important;
 }
 
-.logo {
-  margin: auto;
-  width: 56px;
-  height: 56px;
-  display: grid;
-  place-items: center;
-  border-radius: 17px;
-  background: #1d4ed8;
-  color: white;
-  font-weight: 900;
-  font-size: 1.5rem;
+.ticket-logo {
+  display: block;
+  margin: 0 auto 1.25rem auto;
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .eyebrow {

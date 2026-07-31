@@ -1,17 +1,33 @@
 <div class="shell" [attr.dir]="langService.lang() === 'ar' ? 'rtl' : 'ltr'">
   <aside>
     <div class="brand">
-      <b>{{ langService.t('brandTitle') }}</b>
-      <span>{{ langService.t('brandSubtitle') }}</span>
+      <div class="brand-text">
+        <img src="/logo.jpg" alt="Valet Logo" class="brand-logo" />
+        <span class="brand-subtitle">{{ langService.t('brandSubtitle') }}</span>
+      </div>
+      <div class="user-lang-bar">
+        @if (username(); as uname) {
+          <span class="user-badge" [title]="uname">👤 {{ uname }}</span>
+        }
+        <button type="button" class="lang-btn" (click)="langService.toggleLang()">
+          🌐 {{ langService.lang() === 'en' ? 'العربية' : 'English' }}
+        </button>
+      </div>
     </div>
     <nav>
-      <a routerLink="/dashboard" routerLinkActive="active">{{ langService.t('dashboardNav') }}</a>
-      <a routerLink="/check-in" routerLinkActive="active">{{ langService.t('checkInNav') }}</a>
+      @if (isValet()) {
+        <a routerLink="/dashboard" routerLinkActive="active">{{ langService.t('dashboardNav') }}</a>
+        <a routerLink="/check-in" routerLinkActive="active">{{ langService.t('checkInNav') }}</a>
+      }
+      @if (isManager()) {
+        <a routerLink="/reports" routerLinkActive="active">{{ langService.t('reportsNav') }}</a>
+        <a routerLink="/users" routerLinkActive="active">{{ langService.t('usersNav') }}</a>
+      }
+      @if (isAdmin()) {
+        <a routerLink="/clients" routerLinkActive="active">{{ langService.t('clientsNav') }}</a>
+      }
     </nav>
     <div class="aside-footer">
-      <button type="button" class="lang-btn" (click)="langService.toggleLang()">
-        🌐 {{ langService.lang() === 'en' ? 'العربية' : 'English' }}
-      </button>
       <button type="button" class="signout-btn" (click)="logout()">{{ langService.t('signOut') }}</button>
     </div>
   </aside>
@@ -19,3 +35,4 @@
     <router-outlet />
   </main>
 </div>
+<app-toast-container />

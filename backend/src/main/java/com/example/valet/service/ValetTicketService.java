@@ -3,11 +3,19 @@ package com.example.valet.service;
 import com.example.valet.dto.AssignTicketRequest;
 import com.example.valet.dto.CreateTicketRequest;
 import com.example.valet.dto.DashboardResponse;
+import com.example.valet.dto.PageResponse;
 import com.example.valet.dto.TicketResponse;
+import com.example.valet.entity.Client;
 import com.example.valet.entity.TicketStatus;
 import com.example.valet.entity.ValetTicket;
+import com.example.valet.repository.ClientRepository;
 import com.example.valet.repository.ValetTicketRepository;
+import com.example.valet.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,23 +26,46 @@ import java.util.*;
 @Service
 public class ValetTicketService {
     private final ValetTicketRepository repository;
+    private final ClientRepository clientRepository;
     private final SmsGateway smsGateway;
+    private final PushNotificationService pushNotificationService;
     private final SecureRandom random = new SecureRandom();
+
     @Value("${app.public-base-url:http://localhost:4200}")
     private String publicBaseUrl;
 
-    public ValetTicketService(ValetTicketRepository repository, SmsGateway smsGateway) {
+    @Value("${app.sms.provider:mail}")
+    private String smsProvider;
+
+    public ValetTicketService(ValetTicketRepository repository, ClientRepository clientRepository, SmsGateway smsGateway, PushNotificationService pushNotificationService) {
         this.repository = repository;
+        this.clientRepository = clientRepository;
         this.smsGateway = smsGateway;
+        this.pushNotificationService = pushNotificationService;
     }
 
-    @Transactional
+    private String getNotificationRecipient(ValetTicket t) {
+        if ("mail".equalsIgnoreCase(smsProvider)) {
+            return t.getVisitorEmail();
+        }
+        return t.getVisitorPhone();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public TicketResponse create(CreateTicketRequest r) {
+        Long clientId = SecurityUtils.getCurrentClientId();
+        String currentUsername = SecurityUtils.getCurrentUsername();
+
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new NoSuchElementException("Client tenant not found for ID: " + clientId));
+
         ValetTicket t = new ValetTicket();
+        t.setClient(client);
         t.setTicketNumber("VLT-" + (100000 + random.nextInt(900000)));
         t.setPublicToken(UUID.randomUUID().toString().replace("-", ""));
         t.setPickupPin(String.format("%06d", random.nextInt(1_000_000)));
         t.setVisitorPhone(r.visitorPhone());
+        t.setVisitorEmail(r.visitorEmail());
         t.setPlateNumber(r.plateNumber().toUpperCase());
         t.setMake(r.make());
         t.setModel(r.model());
@@ -44,14 +75,45 @@ public class ValetTicketService {
         t.setNotes(r.notes());
         t.setStatus(TicketStatus.PARKED);
         t.setCheckedInAt(Instant.now());
+        t.setCreatedBy(currentUsername);
+        t.setUpdatedBy(currentUsername);
         repository.save(t);
-        smsGateway.send(t.getVisitorPhone(), "Welcome. Your valet ticket is " + t.getTicketNumber() + ". Request your vehicle: " + publicBaseUrl + "/v/" + t.getPublicToken() + " Pickup PIN: " + t.getPickupPin());
+
+        String recipient = getNotificationRecipient(t);
+        if (recipient != null && !recipient.isBlank()) {
+            if (smsGateway instanceof EmailSmsGateway emailGateway) {
+                emailGateway.sendTicketCheckInEmail(t, publicBaseUrl + "/v/" + t.getPublicToken());
+            } else {
+                smsGateway.send(recipient, "Welcome. Your valet ticket is " + t.getTicketNumber() + ". Request your vehicle: " + publicBaseUrl + "/v/" + t.getPublicToken() + " Pickup PIN: " + t.getPickupPin());
+            }
+        }
         return TicketResponse.from(t);
     }
 
     @Transactional(readOnly = true)
     public List<TicketResponse> list() {
-        return repository.findAllByOrderByCheckedInAtDesc().stream().map(TicketResponse::from).toList();
+        Long clientId = SecurityUtils.getCurrentClientId();
+        return repository.findAllByClientIdOrderByCheckedInAtDesc(clientId).stream().map(TicketResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<TicketResponse> listPaginated(int page, int size, String status) {
+        Long clientId = SecurityUtils.getCurrentClientId();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "checkedInAt"));
+
+        Page<ValetTicket> ticketPage;
+        if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
+            try {
+                TicketStatus ticketStatus = TicketStatus.valueOf(status.trim().toUpperCase());
+                ticketPage = repository.findAllByClientIdAndStatus(clientId, ticketStatus, pageable);
+            } catch (IllegalArgumentException e) {
+                ticketPage = repository.findAllByClientId(clientId, pageable);
+            }
+        } else {
+            ticketPage = repository.findAllByClientId(clientId, pageable);
+        }
+
+        return PageResponse.from(ticketPage.map(TicketResponse::from));
     }
 
     @Transactional(readOnly = true)
@@ -70,6 +132,7 @@ public class ValetTicketService {
         if (t.getStatus() == TicketStatus.PARKED) {
             t.setStatus(TicketStatus.REQUESTED);
             t.setRequestedAt(Instant.now());
+            pushNotificationService.sendVehicleRequestedNotification(t);
         }
         return TicketResponse.from(t);
     }
@@ -81,17 +144,30 @@ public class ValetTicketService {
             throw new IllegalStateException("Only requested tickets can be assigned");
         t.setAssignedTo(r.assignedTo());
         t.setStatus(TicketStatus.ASSIGNED);
+        t.setUpdatedBy(SecurityUtils.getCurrentUsername());
         return TicketResponse.from(t);
     }
 
     @Transactional
     public TicketResponse transition(Long id, TicketStatus status) {
+        Long clientId = SecurityUtils.getCurrentClientId();
         ValetTicket t = find(id);
+        if (!t.getClient().getId().equals(clientId)) {
+            throw new IllegalStateException("Unauthorized: Ticket client ID (" + t.getClient().getId() + ") does not match token client ID (" + clientId + ")");
+        }
         validateTransition(t.getStatus(), status);
         t.setStatus(status);
+        t.setUpdatedBy(SecurityUtils.getCurrentUsername());
         if (status == TicketStatus.READY) {
             t.setReadyAt(Instant.now());
-            smsGateway.send(t.getVisitorPhone(), "Your vehicle is ready. Ticket " + t.getTicketNumber() + ". Pickup PIN: " + t.getPickupPin());
+            String recipient = getNotificationRecipient(t);
+            if (recipient != null && !recipient.isBlank()) {
+                if (smsGateway instanceof EmailSmsGateway emailGateway) {
+                    emailGateway.sendVehicleReadyEmail(t);
+                } else {
+                    smsGateway.send(recipient, "Your vehicle is ready. Ticket " + t.getTicketNumber() + ". Pickup PIN: " + t.getPickupPin());
+                }
+            }
         }
         if (status == TicketStatus.DELIVERED) t.setDeliveredAt(Instant.now());
         return TicketResponse.from(t);
@@ -99,12 +175,24 @@ public class ValetTicketService {
 
     @Transactional(readOnly = true)
     public DashboardResponse dashboard() {
-        long parked = repository.countByStatus(TicketStatus.PARKED), requested = repository.countByStatus(TicketStatus.REQUESTED), retrieving = repository.countByStatus(TicketStatus.RETRIEVING), ready = repository.countByStatus(TicketStatus.READY), delivered = repository.countByStatus(TicketStatus.DELIVERED);
+        Long clientId = SecurityUtils.getCurrentClientId();
+        long parked = repository.countByClientIdAndStatus(clientId, TicketStatus.PARKED);
+        long requested = repository.countByClientIdAndStatus(clientId, TicketStatus.REQUESTED);
+        long retrieving = repository.countByClientIdAndStatus(clientId, TicketStatus.RETRIEVING);
+        long ready = repository.countByClientIdAndStatus(clientId, TicketStatus.READY);
+        long delivered = repository.countByClientIdAndStatus(clientId, TicketStatus.DELIVERED);
         return new DashboardResponse(parked + requested + retrieving + ready, parked, requested, retrieving, ready, delivered);
     }
 
     private ValetTicket find(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NoSuchElementException("Ticket not found"));
+        Long clientId = SecurityUtils.getCurrentClientId();
+        ValetTicket ticket = repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Ticket not found with id: " + id));
+
+        if (!ticket.getClient().getId().equals(clientId)) {
+            throw new IllegalStateException("Unauthorized: Ticket client ID (" + ticket.getClient().getId() + ") does not match token client ID (" + clientId + ")");
+        }
+        return ticket;
     }
 
     private void validateTransition(TicketStatus from, TicketStatus to) {

@@ -29,25 +29,25 @@ form {
   font-size: 0.85rem !important;
 }
 
-.brand {
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
-  background: #2563eb;
-  color: white;
-  display: grid;
-  place-items: center;
-  font-size: 1.5rem;
-  font-weight: 800;
+.login-logo {
+  display: block;
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  object-fit: cover;
+  margin: 0 auto 1.25rem auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
 }
 
 h1 {
-  margin: 1rem 0 0.25rem;
+  margin: 0.5rem 0 0.25rem;
+  text-align: center;
 }
 
 p {
   color: #64748b;
   margin-top: 0;
+  text-align: center;
 }
 
 label {
@@ -64,6 +64,46 @@ input {
   font: inherit;
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 2.75rem;
+}
+
+[dir="rtl"] .password-input-wrapper input {
+  padding-right: 0.85rem;
+  padding-left: 2.75rem;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 0.6rem;
+  width: auto !important;
+  padding: 0.4rem !important;
+  background: transparent !important;
+  color: #64748b !important;
+  border: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.toggle-password-btn:hover {
+  color: #1e293b !important;
+}
+
+[dir="rtl"] .toggle-password-btn {
+  right: auto;
+  left: 0.6rem;
+}
+
 button {
   width: 100%;
   padding: 0.9rem;
@@ -73,6 +113,7 @@ button {
   color: white;
   font-weight: 700;
   font-size: 1rem;
+  cursor: pointer;
 }
 
 .error {

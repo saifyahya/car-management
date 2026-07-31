@@ -3,13 +3,12 @@ package com.example.valet.controller;
 import com.example.valet.dto.AssignTicketRequest;
 import com.example.valet.dto.CreateTicketRequest;
 import com.example.valet.dto.DashboardResponse;
+import com.example.valet.dto.PageResponse;
 import com.example.valet.dto.TicketResponse;
 import com.example.valet.entity.TicketStatus;
 import com.example.valet.service.ValetTicketService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -26,8 +25,12 @@ public class ValetController {
     }
 
     @GetMapping
-    public List<TicketResponse> list() {
-        return service.list();
+    public PageResponse<TicketResponse> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String status
+    ) {
+        return service.listPaginated(page, size, status);
     }
 
     @GetMapping("/{id}")

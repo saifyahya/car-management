@@ -6,7 +6,7 @@
   </div>
 
   @if (ticket(); as t) {
-    <div class="logo">V</div>
+    <img src="/logo.jpg" alt="Valet Logo" class="ticket-logo" />
     <p class="eyebrow">{{ translations[lang()].eyebrow }}</p>
     <h1>{{ t.color }} {{ t.make }} {{ t.model }}</h1>
     <p class="plate">{{ t.plateNumber }}</p>

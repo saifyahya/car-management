@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
+import { UserRole } from '../../core/models';
 
 @Component({
   standalone: true,
@@ -20,6 +21,12 @@ export class LoginComponent {
   username = 'admin';
   password = 'admin123';
   readonly error = signal('');
+  readonly loading = signal(false);
+  readonly showPassword = signal(false);
+
+  toggleShowPassword(): void {
+    this.showPassword.update(v => !v);
+  }
 
   login(): void {
     if (!this.username || !this.password) {
@@ -27,7 +34,27 @@ export class LoginComponent {
       return;
     }
 
-    this.auth.login(this.username, this.password);
-    this.router.navigateByUrl('/dashboard');
+    this.loading.set(true);
+    this.error.set('');
+
+    this.auth.login(this.username, this.password).subscribe({
+      next: (res) => {
+        if (res.role === UserRole.ADMIN) {
+          this.router.navigateByUrl('/clients');
+        } else if (res.role === UserRole.MANAGER) {
+          this.router.navigateByUrl('/reports');
+        } else {
+          this.router.navigateByUrl('/dashboard');
+        }
+      },
+      error: (err) => {
+        this.loading.set(false);
+        if (err?.status === 403 || err?.error?.message?.toLowerCase().includes('not active')) {
+          this.error.set(this.langService.t('errAccountInactive'));
+        } else {
+          this.error.set(this.langService.t('errBadCreds'));
+        }
+      }
+    });
   }
 }

@@ -1,0 +1,131 @@
+<app-page-header [title]="langService.t('usersTitle')" [subtitle]="langService.t('usersSubtitle')">
+  <button type="button" class="add-btn" (click)="openAddModal()">
+    {{ langService.t('btnAddUser') }}
+  </button>
+</app-page-header>
+
+<div class="users-card">
+  @if (loading()) {
+    <div class="loading-state">Loading users...</div>
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>{{ langService.t('lblUsername') }}</th>
+            <th>{{ langService.t('lblRole') }}</th>
+            <th>{{ langService.t('thStatus') }}</th>
+            <th class="actions-header">{{ langService.t('thActions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr>
+              <td><strong>#{{ u.id }}</strong></td>
+              <td>
+                <div class="user-name">👤 {{ u.username }}</div>
+              </td>
+              <td>
+                <span class="role-tag" [class.role-manager]="u.role === 'MANAGER'" [class.role-valet]="u.role === 'VALET'">
+                  {{ u.role }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-active]="u.isActive" [class.badge-inactive]="!u.isActive">
+                  {{ u.isActive ? langService.t('lblActive') : langService.t('lblInactive') }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="btn-action edit" (click)="openEditModal(u)">
+                  ✏️ {{ langService.t('lblEditUser') }}
+                </button>
+                <button type="button" class="btn-action password" (click)="openChangePasswordModal(u)" title="Change Password">
+                  🔑 {{ langService.t('btnChangePassword') }}
+                </button>
+                <button type="button" class="btn-action toggle" [class.deactivate]="u.isActive" [class.activate]="!u.isActive" (click)="toggleActive(u)">
+                  {{ u.isActive ? ('🛑 ' + langService.t('btnDeactivate')) : ('✅ ' + langService.t('btnActivate')) }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="empty-state">No staff users found for your hotel tenant.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (showModal()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>{{ editingUser() ? langService.t('modalEditUserTitle') : langService.t('modalAddUserTitle') }}</h3>
+      <form (ngSubmit)="saveUser()">
+        <label>
+          <span>{{ langService.t('lblUsername') }} <span class="required-star">*</span></span>
+          <input required type="text" [(ngModel)]="formModel.username" name="username" placeholder="e.g. valet_john" />
+        </label>
+
+        @if (!editingUser()) {
+          <label>
+            <span>{{ langService.t('lblPassword') }} <span class="required-star">*</span></span>
+            <input required type="password" [(ngModel)]="formModel.password" (ngModelChange)="validatePasswordInput()" name="password" placeholder="Min 8 chars, 1 number & 1 special char" />
+            <span class="password-hint">Min 8 characters, at least 1 number & 1 special character</span>
+            @if (passwordError()) {
+              <span class="error-msg">{{ passwordError() }}</span>
+            }
+          </label>
+        }
+
+        <label>
+          <span>{{ langService.t('lblRole') }}</span>
+          <select [(ngModel)]="formModel.role" name="role">
+            <option [value]="'VALET'">VALET (Valet Driver / Staff)</option>
+            <option [value]="'MANAGER'">MANAGER (Hotel Manager)</option>
+          </select>
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">{{ langService.t('btnCancel') }}</button>
+          <button type="submit" class="btn-confirm" [disabled]="saving() || !isFormValid()">
+            {{ saving() ? 'Saving...' : langService.t('btnSave') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showChangePasswordModal()) {
+  <div class="modal-backdrop" (click)="closeChangePasswordModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>🔑 {{ langService.t('modalChangePasswordTitle') }} ({{ passwordUserModel()?.username }})</h3>
+      <form (ngSubmit)="submitChangePassword()">
+        <label>
+          <span>{{ langService.t('lblCurrentPassword') }} <span class="required-star">*</span></span>
+          <input required type="password" [(ngModel)]="changePasswordFormModel.currentPassword" name="currentPassword" placeholder="Enter current password" />
+        </label>
+
+        <label>
+          <span>{{ langService.t('lblNewPassword') }} <span class="required-star">*</span></span>
+          <input required type="password" [(ngModel)]="changePasswordFormModel.newPassword" (ngModelChange)="validateNewPasswordInput()" name="newPassword" placeholder="Min 8 chars, 1 number & 1 special char" />
+          <span class="password-hint">Min 8 characters, at least 1 number & 1 special character</span>
+        </label>
+
+        @if (changePasswordError()) {
+          <span class="error-msg block-error">{{ changePasswordError() }}</span>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeChangePasswordModal()">{{ langService.t('btnCancel') }}</button>
+          <button type="submit" class="btn-confirm" [disabled]="saving() || !changePasswordFormModel.currentPassword || !changePasswordFormModel.newPassword">
+            {{ saving() ? 'Saving...' : langService.t('btnChangePassword') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

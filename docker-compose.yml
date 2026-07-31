@@ -1,13 +1,52 @@
+version: '3.8'
+
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:16-alpine
+    container_name: valet_postgres
+    restart: always
     environment:
-      POSTGRES_DB: valet
-      POSTGRES_USER: valet
-      POSTGRES_PASSWORD: valet
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${DB_NAME:-valet_db}
+      POSTGRES_USER: ${DB_USER:-valet_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-valet_secret_pass}
     volumes:
-      - valet-postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-valet_user} -d ${DB_NAME:-valet_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: valet_backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-valet_db}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-valet_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-valet_secret_pass}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      APP_SMS_PROVIDER: ${APP_SMS_PROVIDER:-mail}
+      APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL:-http://localhost}
+      APP_MAIL_FROM: ${APP_MAIL_FROM:-noreply@hotelvalet.com}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: valet_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
 volumes:
-  valet-postgres:
+  postgres_data:

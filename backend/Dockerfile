@@ -1,11 +1,14 @@
-FROM maven:3.9.11-eclipse-temurin-21 AS build
-WORKDIR /workspace
-COPY pom.xml .
-COPY src src
-RUN mvn -q -DskipTests package
-
-FROM eclipse-temurin:21-jre
+# Build Stage
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
-COPY --from=build /workspace/target/valet-backend-1.0.0.jar app.jar
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Runtime Stage
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

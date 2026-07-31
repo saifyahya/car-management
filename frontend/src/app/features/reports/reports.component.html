@@ -1,0 +1,89 @@
+<app-page-header [title]="langService.t('reportsTitle')" [subtitle]="langService.t('reportsSubtitle')">
+  <div class="mode-switch-wrapper">
+    <button type="button" class="switch-btn" [class.active]="mode() === 'daily'" (click)="setMode('daily')">
+      📅 {{ langService.t('lblDaily') }}
+    </button>
+    <button type="button" class="switch-btn" [class.active]="mode() === 'monthly'" (click)="setMode('monthly')">
+      📊 {{ langService.t('lblMonthly') }}
+    </button>
+  </div>
+</app-page-header>
+
+<div class="filters-bar">
+  <div class="filter-group">
+    <label>
+      <span>{{ langService.t('lblFromDate') }}</span>
+      @if (mode() === 'monthly') {
+        <input type="month" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event); onDateChange()" />
+      } @else {
+        <input type="date" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event); onDateChange()" />
+      }
+    </label>
+    <label>
+      <span>{{ langService.t('lblToDate') }}</span>
+      @if (mode() === 'monthly') {
+        <input type="month" [ngModel]="toDate()" (ngModelChange)="toDate.set($event); onDateChange()" />
+      } @else {
+        <input type="date" [ngModel]="toDate()" (ngModelChange)="toDate.set($event); onDateChange()" />
+      }
+    </label>
+  </div>
+  <button type="button" class="refresh-filter-btn" (click)="load()">
+    🔄 {{ langService.t('refreshBtn') }}
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading-card">Loading report analytics...</div>
+} @else if (analytics(); as data) {
+  <section class="metrics-grid">
+    <article class="metric-card highlight">
+      <div class="metric-icon">🚗</div>
+      <div class="metric-info">
+        <span>{{ langService.t('lblTotalDelivered') }}</span>
+        <strong>{{ data.totalDelivered }}</strong>
+      </div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-icon">🅿️</div>
+      <div class="metric-info">
+        <span>{{ langService.t('statParked') }}</span>
+        <strong>{{ data.totalParked }}</strong>
+      </div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-icon">🛎️</div>
+      <div class="metric-info">
+        <span>{{ langService.t('statRequested') }}</span>
+        <strong>{{ data.totalRequested }}</strong>
+      </div>
+    </article>
+  </section>
+
+  <section class="chart-card">
+    <div class="chart-header">
+      <h3>{{ langService.t('lblTrendChart') }} ({{ mode() === 'monthly' ? langService.t('lblMonthly') : langService.t('lblDaily') }})</h3>
+      <span class="chart-badge">{{ data.fromDate }} → {{ data.toDate }}</span>
+    </div>
+
+    @if (data.dataPoints.length === 0) {
+      <div class="no-chart-data">No vehicle deliveries recorded in this date range.</div>
+    } @else {
+      <div class="chart-container">
+        <div class="bar-chart-grid">
+          @for (point of data.dataPoints; track point.label) {
+            <div class="chart-bar-item">
+              <div class="bar-value">{{ point.count }}</div>
+              <div class="bar-track">
+                <div class="bar-fill" [style.height.%]="(point.count / getMaxCount()) * 100"></div>
+              </div>
+              <div class="bar-label">{{ point.label }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </section>
+}

@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(name = "app.twilio.enabled", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.sms.provider", havingValue = "log")
 public class LoggingSmsGateway implements SmsGateway {
     private static final Logger log = LoggerFactory.getLogger(LoggingSmsGateway.class);
 

@@ -1,1 +1,98 @@
-<app-page-header [title]="langService.t('dashTitle')" [subtitle]="langService.t('dashSubtitle')"><a class="primary" routerLink="/check-in">{{ langService.t('dashCheckInBtn') }}</a></app-page-header>@if(stats();as s){<section class="stats"><article><span>{{ langService.t('statActive') }}</span><strong>{{s.active}}</strong></article><article><span>{{ langService.t('statParked') }}</span><strong>{{s.parked}}</strong></article><article><span>{{ langService.t('statRequested') }}</span><strong>{{s.requested}}</strong></article><article><span>{{ langService.t('statRetrieving') }}</span><strong>{{s.retrieving}}</strong></article><article><span>{{ langService.t('statReady') }}</span><strong>{{s.ready}}</strong></article></section>}<section class="panel"><div class="panel-title"><h2>{{ langService.t('queueTitle') }}</h2><button (click)="load()">{{ langService.t('refreshBtn') }}</button></div><div class="table-wrap"><table><thead><tr><th>{{ langService.t('thTicket') }}</th><th>{{ langService.t('thVehicle') }}</th><th>{{ langService.t('thPlate') }}</th><th>{{ langService.t('thLocation') }}</th><th>{{ langService.t('thStatus') }}</th><th></th></tr></thead><tbody>@for(ticket of tickets();track ticket.id){<tr [class.non-parked]="ticket.status !== 'PARKED'" [class]="'status-' + ticket.status.toLowerCase()"><td>{{ticket.ticketNumber}}</td><td>{{ticket.color}} {{ticket.make}} {{ticket.model}}</td><td>{{ticket.plateNumber}}</td><td>{{ticket.parkingLocation||'—'}}</td><td><app-status-badge [status]="ticket.status" /></td><td><a [routerLink]="['/tickets',ticket.id]">{{ langService.t('openBtn') }}</a></td></tr>}@empty{<tr><td colspan="6" class="empty">{{ langService.t('noVehicles') }}</td></tr>}</tbody></table></div></section>
+<app-page-header [title]="langService.t('dashTitle')" [subtitle]="langService.t('dashSubtitle')">
+  <a class="primary" routerLink="/check-in">{{ langService.t('dashCheckInBtn') }}</a>
+</app-page-header>
+
+@if (pushService.isSupported() && !pushService.permissionGranted()) {
+  <div class="push-banner">
+    <div class="push-content">
+      <span>{{ langService.t('promptEnableNotifications') }}</span>
+      <button type="button" class="push-btn" (click)="enablePush()" [disabled]="pushService.subscribing()">
+        {{ pushService.subscribing() ? '...' : langService.t('btnEnablePush') }}
+      </button>
+    </div>
+  </div>
+}
+
+@if (stats(); as s) {
+  <section class="stats">
+    <article class="stat-card" [class.active-filter]="selectedFilter() === 'PARKED'" (click)="setFilter('PARKED')">
+      <span>{{ langService.t('statParked') }}</span>
+      <strong>{{s.parked}}</strong>
+    </article>
+    <article class="stat-card" [class.active-filter]="selectedFilter() === 'REQUESTED'" (click)="setFilter('REQUESTED')">
+      <span>{{ langService.t('statRequested') }}</span>
+      <strong>{{s.requested}}</strong>
+    </article>
+    <article class="stat-card" [class.active-filter]="selectedFilter() === 'RETRIEVING'" (click)="setFilter('RETRIEVING')">
+      <span>{{ langService.t('statRetrieving') }}</span>
+      <strong>{{s.retrieving}}</strong>
+    </article>
+    <article class="stat-card" [class.active-filter]="selectedFilter() === 'READY'" (click)="setFilter('READY')">
+      <span>{{ langService.t('statReady') }}</span>
+      <strong>{{s.ready}}</strong>
+    </article>
+    <article class="stat-card" [class.active-filter]="selectedFilter() === 'DELIVERED'" (click)="setFilter('DELIVERED')">
+      <span>{{ langService.t('statDelivered') }}</span>
+      <strong>{{s.delivered}}</strong>
+    </article>
+  </section>
+}
+
+<section class="panel">
+  <div class="panel-title">
+    <div class="title-with-filter">
+      <h2>{{ langService.t('queueTitle') }}</h2>
+      @if (selectedFilter() !== 'ALL') {
+        <span class="filter-pill">
+          Filter: {{ selectedFilter() }}
+          <button type="button" class="clear-filter-btn" (click)="setFilter('ALL')">✕</button>
+        </span>
+      }
+    </div>
+    <button (click)="load()">{{ langService.t('refreshBtn') }}</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>{{ langService.t('thTicket') }}</th>
+          <th>{{ langService.t('thVehicle') }}</th>
+          <th>{{ langService.t('thPlate') }}</th>
+          <th>{{ langService.t('thLocation') }}</th>
+          <th>{{ langService.t('thStatus') }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ticket of tickets(); track ticket.id) {
+          <tr [class.non-parked]="ticket.status !== 'PARKED'" [class]="'status-' + ticket.status.toLowerCase()">
+            <td>{{ticket.ticketNumber}}</td>
+            <td>{{ticket.color}} {{ticket.make}} {{ticket.model}}</td>
+            <td>{{ticket.plateNumber}}</td>
+            <td>{{ticket.parkingLocation || '—'}}</td>
+            <td><app-status-badge [status]="ticket.status" /></td>
+            <td><a [routerLink]="['/tickets', ticket.id]">{{ langService.t('openBtn') }}</a></td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty">{{ langService.t('noVehicles') }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (totalPages() > 1 || totalElements() > 0) {
+    <div class="pagination-bar">
+      <button type="button" class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 0">
+        ◀ {{ langService.t('lblPrevious') }}
+      </button>
+      <span class="page-info">
+        {{ langService.t('lblPage') }} {{ currentPage() + 1 }} {{ langService.t('lblOf') }} {{ totalPages() }} ({{ totalElements() }} total)
+      </span>
+      <button type="button" class="page-btn" (click)="nextPage()" [disabled]="isLastPage() || currentPage() >= totalPages() - 1">
+        {{ langService.t('lblNext') }} ▶
+      </button>
+    </div>
+  }
+</section>

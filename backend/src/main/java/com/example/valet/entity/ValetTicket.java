@@ -10,6 +10,10 @@ public class ValetTicket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
     @Version
     private Long version;
     @Column(nullable = false, unique = true, length = 30)
@@ -18,6 +22,8 @@ public class ValetTicket {
     private String publicToken;
     @Column(nullable = false, length = 30)
     private String visitorPhone;
+    @Column(length = 100)
+    private String visitorEmail;
     @Column(nullable = false, length = 30)
     private String plateNumber;
     @Column(nullable = false, length = 50)
@@ -45,8 +51,22 @@ public class ValetTicket {
     @Column(nullable = false, length = 6)
     private String pickupPin;
 
+    @Column(length = 50)
+    private String createdBy;
+
+    @Column(length = 50)
+    private String updatedBy;
+
     public Long getId() {
         return id;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public Long getVersion() {
@@ -75,6 +95,14 @@ public class ValetTicket {
 
     public void setVisitorPhone(String v) {
         visitorPhone = v;
+    }
+
+    public String getVisitorEmail() {
+        return visitorEmail;
+    }
+
+    public void setVisitorEmail(String v) {
+        visitorEmail = v;
     }
 
     public String getPlateNumber() {
@@ -187,5 +215,21 @@ public class ValetTicket {
 
     public void setPickupPin(String v) {
         pickupPin = v;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 }

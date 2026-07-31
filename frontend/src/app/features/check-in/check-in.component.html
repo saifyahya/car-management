@@ -1,1 +1,67 @@
-<app-page-header [title]="langService.t('checkInTitle')" [subtitle]="langService.t('checkInSub')"/><form (ngSubmit)="save()"><section><h2>{{ langService.t('secVisitor') }}</h2><div class="grid"><label>{{ langService.t('lblPhone') }}<input required name="phone" [(ngModel)]="model.visitorPhone" placeholder="+9627..."></label><label>{{ langService.t('lblPlate') }}<input required name="plate" [(ngModel)]="model.plateNumber"></label><label>{{ langService.t('lblMake') }}<input required name="make" [(ngModel)]="model.make"></label><label>{{ langService.t('lblModel') }}<input required name="model" [(ngModel)]="model.model"></label><label>{{ langService.t('lblColor') }}<input required name="color" [(ngModel)]="model.color"></label></div></section><section><h2>{{ langService.t('secParking') }}</h2><div class="grid"><label>{{ langService.t('lblParkingLoc') }}<input name="parking" [(ngModel)]="model.parkingLocation" placeholder="B2-18"></label><label>{{ langService.t('lblKeyLoc') }}<input name="key" [(ngModel)]="model.keyLocation" placeholder="Cabinet 2 / Hook 14"></label></div><label>{{ langService.t('lblNotes') }}<textarea name="notes" [(ngModel)]="model.notes" rows="4"></textarea></label></section><button [disabled]="saving()">{{saving()?langService.t('btnSaving'):langService.t('btnCreateTicket')}}</button></form>
+<app-page-header [title]="langService.t('checkInTitle')" [subtitle]="langService.t('checkInSub')"/>
+<form (ngSubmit)="save()">
+  <section>
+    <h2>{{ langService.t('secVisitor') }}</h2>
+    <div class="grid">
+      <label>
+        <span>{{ langService.t('lblPhone') }} <span class="required-star">*</span></span>
+        <div class="phone-input-group">
+          <select name="countryCode" [(ngModel)]="selectedCountryCode">
+            @for (c of countryCodes; track c.code) {
+              <option [value]="c.code">{{ c.flag }} {{ c.label }}</option>
+            }
+          </select>
+          <input required name="localPhone" [(ngModel)]="localPhoneNumber" placeholder="790824434" type="tel" maxlength="11" />
+        </div>
+        @if (localPhoneNumber.trim() && !isValidPhone()) {
+          <span class="field-error">{{ langService.t('hintPhoneFormat') }}</span>
+        }
+      </label>
+      <label>
+        <span>{{ langService.t('lblEmail') }}</span>
+        <input name="email" type="email" [(ngModel)]="model.visitorEmail" placeholder="guest@example.com" />
+        @if (model.visitorEmail?.trim() && !isValidEmail()) {
+          <span class="field-error">{{ langService.t('hintEmailFormat') }}</span>
+        }
+      </label>
+      <label>
+        <span>{{ langService.t('lblPlate') }} <span class="required-star">*</span></span>
+        <input required name="plate" [(ngModel)]="model.plateNumber" placeholder="e.g. 12-34567" />
+      </label>
+      <label>
+        <span>{{ langService.t('lblMake') }} <span class="required-star">*</span></span>
+        <input required name="make" [(ngModel)]="model.make" placeholder="e.g. Mercedes" />
+      </label>
+      <label>
+        <span>{{ langService.t('lblModel') }} <span class="required-star">*</span></span>
+        <input required name="model" [(ngModel)]="model.model" placeholder="e.g. S-Class" />
+      </label>
+      <label>
+        <span>{{ langService.t('lblColor') }} <span class="required-star">*</span></span>
+        <input required name="color" [(ngModel)]="model.color" placeholder="e.g. Black" />
+      </label>
+    </div>
+  </section>
+
+  <section>
+    <h2>{{ langService.t('secParking') }}</h2>
+    <div class="grid">
+      <label>
+        <span>{{ langService.t('lblParkingLoc') }} <span class="required-star">*</span></span>
+        <input required name="parking" [(ngModel)]="model.parkingLocation" placeholder="e.g. B2-18" />
+      </label>
+      <label>
+        <span>{{ langService.t('lblKeyLoc') }} <span class="required-star">*</span></span>
+        <input required name="key" [(ngModel)]="model.keyLocation" placeholder="e.g. Cabinet 2 / Hook 14" />
+      </label>
+    </div>
+    <label>
+      <span>{{ langService.t('lblNotes') }}</span>
+      <textarea name="notes" [(ngModel)]="model.notes" rows="4" placeholder="Optional notes..."></textarea>
+    </label>
+  </section>
+
+  <button type="submit" [disabled]="!isFormValid() || saving()">
+    {{ saving() ? langService.t('btnSaving') : langService.t('btnCreateTicket') }}
+  </button>
+</form>

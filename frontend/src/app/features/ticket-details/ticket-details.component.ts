@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Ticket, TicketStatus } from '../../core/models';
 import { ValetApiService } from '../../core/valet-api.service';
@@ -9,7 +10,7 @@ import { LanguageService } from '../../core/language.service';
 
 @Component({
   standalone: true,
-  imports: [RouterLink, DatePipe, PageHeaderComponent, StatusBadgeComponent],
+  imports: [RouterLink, DatePipe, FormsModule, PageHeaderComponent, StatusBadgeComponent],
   templateUrl: './ticket-details.component.html',
   styleUrl: './ticket-details.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,6 +21,9 @@ export class TicketDetailsComponent {
   readonly langService = inject(LanguageService);
   readonly ticket = signal<Ticket | null>(null);
 
+  readonly showAssignModal = signal(false);
+  valetName = 'Valet 1';
+
   constructor() {
     this.load();
   }
@@ -28,10 +32,21 @@ export class TicketDetailsComponent {
     this.api.get(this.id).subscribe(t => this.ticket.set(t));
   }
 
-  assign() {
-    const promptText = this.langService.t('promptValetName');
-    const name = prompt(promptText, 'Valet 1');
-    if (name) this.api.assign(this.id, name).subscribe(t => this.ticket.set(t));
+  openAssignModal() {
+    this.showAssignModal.set(true);
+  }
+
+  closeAssignModal() {
+    this.showAssignModal.set(false);
+  }
+
+  submitAssign() {
+    if (this.valetName && this.valetName.trim()) {
+      this.api.assign(this.id, this.valetName.trim()).subscribe(t => {
+        this.ticket.set(t);
+        this.closeAssignModal();
+      });
+    }
   }
 
   move(status: TicketStatus) {

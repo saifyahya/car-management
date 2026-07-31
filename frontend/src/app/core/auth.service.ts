@@ -1,10 +1,49 @@
-import { Injectable, signal } from '@angular/core';
-@Injectable({ providedIn: 'root' }) export class AuthService {
-     private readonly credentialKey = 'valet_credentials';
-    readonly loggedIn = signal(!!sessionStorage.getItem(this.credentialKey));
-     login(username: string, password: string) {
-         sessionStorage.setItem(this.credentialKey, btoa(`${username}:${password}`));
-          this.loggedIn.set(true); 
-        } 
-        logout() { 
-            sessionStorage.removeItem(this.credentialKey); this.loggedIn.set(false); } credentials() { return sessionStorage.getItem(this.credentialKey); } }
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { UserRole } from './models';
+
+export interface AuthResponse {
+  token: string | null;
+  username: string;
+  role: UserRole | string;
+  clientId: number;
+  clientName: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly tokenKey = 'valet_jwt_token';
+
+  readonly loggedIn = signal(!!sessionStorage.getItem(this.tokenKey));
+  readonly currentUser = signal<AuthResponse | null>(null);
+
+  login(username: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>('http://localhost:8080/api/auth/login', { username, password }).pipe(
+      tap(res => {
+        if (res.token) {
+          sessionStorage.setItem(this.tokenKey, res.token);
+        }
+        this.currentUser.set(res);
+        this.loggedIn.set(true);
+      })
+    );
+  }
+
+  fetchCurrentUser(): Observable<AuthResponse> {
+    return this.http.get<AuthResponse>('http://localhost:8080/api/auth/me').pipe(
+      tap(res => this.currentUser.set(res))
+    );
+  }
+
+  logout() {
+    sessionStorage.removeItem(this.tokenKey);
+    this.currentUser.set(null);
+    this.loggedIn.set(false);
+  }
+
+  token(): string | null {
+    return sessionStorage.getItem(this.tokenKey);
+  }
+}

@@ -12,8 +12,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
-@Primary
-@ConditionalOnProperty(name = "app.twilio.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "app.sms.provider", havingValue = "twilio")
 public class TwilioSmsGateway implements SmsGateway {
     private static final Logger log = LoggerFactory.getLogger(TwilioSmsGateway.class);
 

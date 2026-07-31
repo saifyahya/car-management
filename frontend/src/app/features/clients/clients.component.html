@@ -1,0 +1,114 @@
+<app-page-header [title]="langService.t('clientsTitle')" [subtitle]="langService.t('clientsSubtitle')">
+  <button type="button" class="add-btn" (click)="openAddModal()">
+    {{ langService.t('btnAddClient') }}
+  </button>
+</app-page-header>
+
+<div class="clients-card">
+  @if (loading()) {
+    <div class="loading-state">Loading clients...</div>
+  } @else {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>{{ langService.t('thClientName') }}</th>
+            <th>{{ langService.t('thContact') }}</th>
+            <th>{{ langService.t('thLocation') }}</th>
+            <th>{{ langService.t('thStatus') }}</th>
+            <th class="actions-header">{{ langService.t('thActions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of clients(); track c.id) {
+            <tr>
+              <td><strong>#{{ c.id }}</strong></td>
+              <td>
+                <div class="client-name">{{ c.name }}</div>
+              </td>
+              <td>
+                <div class="contact-info">
+                  @if (c.phoneNumber) { <div>📞 {{ c.phoneNumber }}</div> }
+                  @if (c.email) { <div>✉️ {{ c.email }}</div> }
+                  @if (!c.phoneNumber && !c.email) { <span>—</span> }
+                </div>
+              </td>
+              <td>{{ c.location || '—' }}</td>
+              <td>
+                <span class="badge" [class.badge-active]="c.isActive" [class.badge-inactive]="!c.isActive">
+                  {{ c.isActive ? langService.t('lblActive') : langService.t('lblInactive') }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="btn-action edit" (click)="openEditModal(c)">
+                  ✏️ {{ langService.t('btnEdit') }}
+                </button>
+                <button type="button" class="btn-action toggle" [class.deactivate]="c.isActive" [class.activate]="!c.isActive" (click)="toggleActive(c)">
+                  {{ c.isActive ? ('🛑 ' + langService.t('btnDeactivate')) : ('✅ ' + langService.t('btnActivate')) }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-state">No clients found. Click "+ Add new client" to create one.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (showModal()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>{{ editingClient() ? langService.t('modalEditClientTitle') : langService.t('modalAddClientTitle') }}</h3>
+      <form (ngSubmit)="saveClient()">
+        <label>
+          <span>{{ langService.t('lblClientName') }} <span class="required-star">*</span></span>
+          <input required type="text" [(ngModel)]="formModel.name" name="clientName" placeholder="e.g. Grand Hyatt Hotel" />
+        </label>
+
+        <label>
+          {{ langService.t('lblClientPhone') }}
+          <input type="text" [(ngModel)]="formModel.phoneNumber" name="clientPhone" placeholder="+96260000000" />
+        </label>
+
+        <label>
+          {{ langService.t('lblClientEmail') }}
+          <input type="email" [(ngModel)]="formModel.email" name="clientEmail" placeholder="info@hotel.com" />
+        </label>
+
+        <label>
+          {{ langService.t('lblClientLocation') }}
+          <input type="text" [(ngModel)]="formModel.location" name="clientLocation" placeholder="Amman, Jordan" />
+        </label>
+
+        @if (!editingClient()) {
+          <label>
+            <span>{{ langService.t('lblDefaultUsername') }}</span>
+            <input type="text" [(ngModel)]="formModel.username" name="defaultUsername" placeholder="e.g. hyatt_valet" />
+          </label>
+
+          <label>
+            <span>{{ langService.t('lblDefaultPassword') }}</span>
+            <input type="password" [(ngModel)]="formModel.defaultPassword" name="defaultPassword" placeholder="Default: valet123" />
+          </label>
+        }
+
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="formModel.isActive" name="clientIsActive" />
+          {{ langService.t('lblIsActive') }}
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">{{ langService.t('btnCancel') }}</button>
+          <button type="submit" class="btn-confirm" [disabled]="saving() || !isClientFormValid()">
+            {{ saving() ? 'Saving...' : langService.t('btnSave') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
