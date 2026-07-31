@@ -5,7 +5,7 @@ import { Dashboard, CreateTicket, Ticket, TicketStatus, Client, CreateClient, Up
 @Injectable({ providedIn: 'root' })
 export class ValetApiService {
   private readonly http = inject(HttpClient);
-  private readonly base = 'http://localhost:8080';
+  private readonly base = '';
 
   // Tickets
   list(page: number = 0, size: number = 15, status?: string) {

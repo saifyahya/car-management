@@ -32,6 +32,10 @@ export class TicketDetailsComponent {
     this.api.get(this.id).subscribe(t => this.ticket.set(t));
   }
 
+  getVisitorLink(token: string): string {
+    return `${window.location.origin}/v/${token}`;
+  }
+
   openAssignModal() {
     this.showAssignModal.set(true);
   }

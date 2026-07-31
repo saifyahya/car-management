@@ -20,7 +20,7 @@ export class AuthService {
   readonly currentUser = signal<AuthResponse | null>(null);
 
   login(username: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('http://localhost:8080/api/auth/login', { username, password }).pipe(
+    return this.http.post<AuthResponse>('/api/auth/login', { username, password }).pipe(
       tap(res => {
         if (res.token) {
           sessionStorage.setItem(this.tokenKey, res.token);
@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   fetchCurrentUser(): Observable<AuthResponse> {
-    return this.http.get<AuthResponse>('http://localhost:8080/api/auth/me').pipe(
+    return this.http.get<AuthResponse>('/api/auth/me').pipe(
       tap(res => this.currentUser.set(res))
     );
   }
