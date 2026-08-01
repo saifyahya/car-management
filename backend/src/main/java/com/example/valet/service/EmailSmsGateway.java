@@ -130,6 +130,7 @@ public class EmailSmsGateway implements SmsGateway {
             log.info("HTML Email notification successfully sent to [{}] for subject [{}]", recipient, subject);
         } catch (Exception e) {
             log.error("Failed to send HTML Email notification to [{}]: {}", recipient, e.getMessage(), e);
+            throw new RuntimeException("Failed to send email notification: " + e.getMessage(), e);
         }
     }
 

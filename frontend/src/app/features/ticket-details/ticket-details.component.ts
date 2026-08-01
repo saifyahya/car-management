@@ -22,6 +22,7 @@ export class TicketDetailsComponent {
   readonly ticket = signal<Ticket | null>(null);
 
   readonly showAssignModal = signal(false);
+  readonly loading = signal(false);
   valetName = 'Valet 1';
 
   constructor() {
@@ -46,14 +47,26 @@ export class TicketDetailsComponent {
 
   submitAssign() {
     if (this.valetName && this.valetName.trim()) {
-      this.api.assign(this.id, this.valetName.trim()).subscribe(t => {
-        this.ticket.set(t);
-        this.closeAssignModal();
+      this.loading.set(true);
+      this.api.assign(this.id, this.valetName.trim()).subscribe({
+        next: (t) => {
+          this.ticket.set(t);
+          this.closeAssignModal();
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false)
       });
     }
   }
 
   move(status: TicketStatus) {
-    this.api.transition(this.id, status).subscribe(t => this.ticket.set(t));
+    this.loading.set(true);
+    this.api.transition(this.id, status).subscribe({
+      next: (t) => {
+        this.ticket.set(t);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
   }
 }

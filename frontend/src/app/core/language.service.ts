@@ -110,6 +110,8 @@ export class LanguageService {
       modalValetNamePlaceholder: 'e.g. Valet 1',
       btnCancel: 'Cancel',
       btnConfirmAssign: 'Assign',
+      lblCreatedBy: 'Created by',
+      lblUpdatedBy: 'Updated by',
 
       // Login
       loginTitle: 'Valet',
@@ -251,6 +253,8 @@ export class LanguageService {
       modalValetNamePlaceholder: 'مثال: فاليه 1',
       btnCancel: 'إلغاء',
       btnConfirmAssign: 'تكليف',
+      lblCreatedBy: 'أنشئت بواسطة',
+      lblUpdatedBy: 'حُدثت بواسطة',
 
       // Login
       loginTitle: 'فاليه',

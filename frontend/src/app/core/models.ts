@@ -6,7 +6,7 @@ export enum UserRole {
   MANAGER = 'MANAGER'
 }
 
-export interface Ticket {id:number;ticketNumber:string;publicToken:string;visitorPhone:string;visitorEmail?:string;plateNumber:string;make:string;model:string;color:string;parkingLocation?:string;keyLocation?:string;assignedTo?:string;notes?:string;status:TicketStatus;checkedInAt:string;requestedAt?:string;readyAt?:string;deliveredAt?:string;pickupPin:string;}
+export interface Ticket {id:number;ticketNumber:string;publicToken:string;visitorPhone:string;visitorEmail?:string;plateNumber:string;make:string;model:string;color:string;parkingLocation?:string;keyLocation?:string;assignedTo?:string;notes?:string;status:TicketStatus;checkedInAt:string;requestedAt?:string;readyAt?:string;deliveredAt?:string;pickupPin:string;createdBy?:string;updatedBy?:string;}
 export interface Dashboard {active:number;parked:number;requested:number;retrieving:number;ready:number;delivered:number;}
 export interface CreateTicket {visitorPhone:string;visitorEmail?:string;plateNumber:string;make:string;model:string;color:string;parkingLocation:string;keyLocation:string;notes:string;}
 

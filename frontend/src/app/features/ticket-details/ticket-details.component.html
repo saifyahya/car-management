@@ -1,1 +1,80 @@
-@if(ticket();as t){<app-page-header [title]="t.ticketNumber" [subtitle]="t.color+' '+t.make+' '+t.model"><a routerLink="/dashboard">{{ langService.t('backBtn') }}</a></app-page-header><div class="layout"><section class="card"><div class="hero"><div><span>{{ langService.t('lblPlate') }}</span><strong>{{t.plateNumber}}</strong></div><app-status-badge [status]="t.status" /></div><dl><div><dt>{{ langService.t('lblPhone') }}</dt><dd>{{t.visitorPhone}}</dd></div><div><dt>{{ langService.t('lblEmail') }}</dt><dd>{{t.visitorEmail||'—'}}</dd></div><div><dt>{{ langService.t('lblParkingLoc') }}</dt><dd>{{t.parkingLocation||'—'}}</dd></div><div><dt>{{ langService.t('lblKeyLoc') }}</dt><dd>{{t.keyLocation||'—'}}</dd></div><div><dt>{{ langService.t('lblAssignedTo') }}</dt><dd>{{t.assignedTo||'—'}}</dd></div><div><dt>{{ langService.t('lblPickupPin') }}</dt><dd>{{t.pickupPin}}</dd></div><div><dt>{{ langService.t('lblNotes') }}</dt><dd>{{t.notes||'—'}}</dd></div></dl></section><section class="card"><h2>{{ langService.t('secActions') }}</h2><div class="actions">@if(t.status==='REQUESTED'){<button (click)="openAssignModal()">{{ langService.t('btnAssignValet') }}</button>}@if(t.status==='ASSIGNED'){<button (click)="move('RETRIEVING')">{{ langService.t('btnStartRetrieval') }}</button>}@if(t.status==='RETRIEVING'){<button (click)="move('READY')">{{ langService.t('btnMarkReady') }}</button>}@if(t.status==='READY'){<button (click)="move('DELIVERED')">{{ langService.t('btnConfirmDelivery') }}</button>}@if(t.status==='PARKED'){<p>{{ langService.t('msgWaitingVisitor') }}</p>}@if(t.status==='DELIVERED'){<p>{{ langService.t('msgTicketComplete') }}</p>}</div><h2>{{ langService.t('secTimeline') }}</h2><dl><div><dt>{{ langService.t('lblCheckedInAt') }}</dt><dd>{{t.checkedInAt | date:'medium'}}</dd></div>@if(t.requestedAt){<div><dt>{{ langService.t('lblRequestedAt') }}</dt><dd>{{t.requestedAt | date:'medium'}}</dd></div>}@if(t.readyAt){<div><dt>{{ langService.t('lblReadyAt') }}</dt><dd>{{t.readyAt | date:'medium'}}</dd></div>}@if(t.deliveredAt){<div><dt>{{ langService.t('lblDeliveredAt') }}</dt><dd>{{t.deliveredAt | date:'medium'}}</dd></div>}</dl><h2>{{ langService.t('secVisitorLink') }}</h2><code>{{ getVisitorLink(t.publicToken) }}</code></section></div>}@if(showAssignModal()){<div class="modal-backdrop" (click)="closeAssignModal()"><div class="modal-card" (click)="$event.stopPropagation()"><h3>{{ langService.t('modalAssignTitle') }}</h3><label>{{ langService.t('modalValetNameLabel') }}<input type="text" [(ngModel)]="valetName" [placeholder]="langService.t('modalValetNamePlaceholder')" (keyup.enter)="submitAssign()" /></label><div class="modal-actions"><button type="button" class="btn-cancel" (click)="closeAssignModal()">{{ langService.t('btnCancel') }}</button><button type="button" class="btn-confirm" (click)="submitAssign()">{{ langService.t('btnConfirmAssign') }}</button></div></div></div>}
+@if(ticket();as t){<app-page-header [title]="t.ticketNumber" [subtitle]="t.color+' '+t.make+' '+t.model"><a
+        routerLink="/dashboard">{{ langService.t('backBtn') }}</a></app-page-header>
+<div class="layout">
+    <section class="card">
+        <div class="hero">
+            <div><span>{{ langService.t('lblPlate') }}</span><strong>{{t.plateNumber}}</strong></div><app-status-badge
+                [status]="t.status" />
+        </div>
+        <dl>
+            <div>
+                <dt>{{ langService.t('lblPhone') }}</dt>
+                <dd>{{t.visitorPhone}}</dd>
+            </div>
+            <div>
+                <dt>{{ langService.t('lblEmail') }}</dt>
+                <dd>{{t.visitorEmail||'—'}}</dd>
+            </div>
+            <div>
+                <dt>{{ langService.t('lblParkingLoc') }}</dt>
+                <dd>{{t.parkingLocation||'—'}}</dd>
+            </div>
+            <div>
+                <dt>{{ langService.t('lblKeyLoc') }}</dt>
+                <dd>{{t.keyLocation||'—'}}</dd>
+            </div>
+            <div>
+                <dt>{{ langService.t('lblAssignedTo') }}</dt>
+                <dd>{{t.assignedTo||'—'}}</dd>
+            </div>
+            <div>
+                <dt>{{ langService.t('lblPickupPin') }}</dt>
+                <dd>{{t.pickupPin}}</dd>
+            </div>
+            <div>
+                <dt>{{ langService.t('lblNotes') }}</dt>
+                <dd>{{t.notes||'—'}}</dd>
+            </div>
+            <div>
+                <dt>{{ langService.t('lblCreatedBy') }}</dt>
+                <dd>{{t.createdBy||'—'}}</dd>
+            </div>
+        </dl>
+    </section>
+    <section class="card">
+        <h2>{{ langService.t('secActions') }}</h2>
+        <div class="actions">@if(t.status==='REQUESTED'){<button (click)="openAssignModal()" [disabled]="loading()">{{
+                langService.t('btnAssignValet') }}</button>}@if(t.status==='ASSIGNED'){<button
+                (click)="move('RETRIEVING')" [disabled]="loading()">{{ langService.t('btnStartRetrieval')
+                }}</button>}@if(t.status==='RETRIEVING'){<button (click)="move('READY')" [disabled]="loading()">{{
+                langService.t('btnMarkReady') }}</button>}@if(t.status==='READY'){<button (click)="move('DELIVERED')" [disabled]="loading()">{{
+                langService.t('btnConfirmDelivery') }}</button>}@if(t.status==='PARKED'){<p>{{
+                langService.t('msgWaitingVisitor') }}</p>}@if(t.status==='DELIVERED'){<p>{{
+                langService.t('msgTicketComplete') }}</p>}</div>
+        <h2>{{ langService.t('secTimeline') }}</h2>
+        <dl>
+            <div>
+                <dt>{{ langService.t('lblCheckedInAt') }}</dt>
+                <dd>{{t.checkedInAt | date:'medium'}}</dd>
+            </div>@if(t.requestedAt){<div>
+                <dt>{{ langService.t('lblRequestedAt') }}</dt>
+                <dd>{{t.requestedAt | date:'medium'}}</dd>
+            </div>}@if(t.readyAt){<div>
+                <dt>{{ langService.t('lblReadyAt') }}</dt>
+                <dd>{{t.readyAt | date:'medium'}}</dd>
+            </div>}@if(t.deliveredAt){<div>
+                <dt>{{ langService.t('lblDeliveredAt') }}</dt>
+                <dd>{{t.deliveredAt | date:'medium'}}</dd>
+            </div>}
+        </dl>
+    </section>
+</div>}@if(showAssignModal()){<div class="modal-backdrop" (click)="closeAssignModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+        <h3>{{ langService.t('modalAssignTitle') }}</h3><label>{{ langService.t('modalValetNameLabel') }}<input
+                type="text" [(ngModel)]="valetName" [placeholder]="langService.t('modalValetNamePlaceholder')"
+                (keyup.enter)="submitAssign()" [disabled]="loading()" /></label>
+        <div class="modal-actions"><button type="button" class="btn-cancel" (click)="closeAssignModal()" [disabled]="loading()">{{
+                langService.t('btnCancel') }}</button><button type="button" class="btn-confirm"
+                (click)="submitAssign()" [disabled]="loading()">{{ langService.t('btnConfirmAssign') }}</button></div>
+    </div>
+</div>}
