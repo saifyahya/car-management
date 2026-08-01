@@ -30,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (clientRepository.count() == 0) {
 
-            if (userRepository.findByUsername("admin").isEmpty()) {
+            if (userRepository.findByUsernameIgnoreCase("admin").isEmpty()) {
 
                 log.info("Seeding default ADMIN and VALET staff user accounts...");
                 UserAccount admin = new UserAccount();

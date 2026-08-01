@@ -50,7 +50,7 @@ public class UserService {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NoSuchElementException("Client not found with id: " + clientId));
 
-        userRepository.findByUsernameAndClientId(req.username().trim(), clientId).ifPresent(u -> {
+        userRepository.findByUsernameIgnoreCaseAndClientId(req.username().trim(), clientId).ifPresent(u -> {
             throw new IllegalArgumentException("Username '" + req.username() + "' already exists for this client");
         });
 
@@ -82,7 +82,7 @@ public class UserService {
 
         String newUsername = req.username().trim();
         if (!user.getUsername().equalsIgnoreCase(newUsername)) {
-            userRepository.findByUsernameAndClientId(newUsername, tokenClientId).ifPresent(u -> {
+            userRepository.findByUsernameIgnoreCaseAndClientId(newUsername, tokenClientId).ifPresent(u -> {
                 throw new IllegalArgumentException("Username '" + newUsername + "' is already taken for this client");
             });
             user.setUsername(newUsername);

@@ -169,14 +169,14 @@ public class ValetTicketService {
         t.setUpdatedBy(SecurityUtils.getCurrentUsername());
         if (status == TicketStatus.READY) {
             t.setReadyAt(Instant.now());
-            String recipient = getNotificationRecipient(t);
-            if (recipient != null && !recipient.isBlank()) {
-                if (smsGateway instanceof EmailSmsGateway emailGateway) {
-                    emailGateway.sendVehicleReadyEmail(t);
-                } else {
-                    smsGateway.send(recipient, "Your vehicle is ready. Ticket " + t.getTicketNumber() + ". Pickup PIN: " + t.getPickupPin());
-                }
-            }
+//            String recipient = getNotificationRecipient(t);
+//            if (recipient != null && !recipient.isBlank()) {
+//                if (smsGateway instanceof EmailSmsGateway emailGateway) {
+//                    emailGateway.sendVehicleReadyEmail(t);
+//                } else {
+//                    smsGateway.send(recipient, "Your vehicle is ready. Ticket " + t.getTicketNumber() + ". Pickup PIN: " + t.getPickupPin());
+//                }
+//            }
         }
         if (status == TicketStatus.DELIVERED) t.setDeliveredAt(Instant.now());
         return TicketResponse.from(t);

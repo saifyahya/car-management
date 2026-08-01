@@ -11,16 +11,16 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<UserAccount, Long> {
     @EntityGraph(attributePaths = {"client"})
-    Optional<UserAccount> findByUsername(String username);
+    Optional<UserAccount> findByUsernameIgnoreCase(String username);
 
     @EntityGraph(attributePaths = {"client"})
-    Optional<UserAccount> findFirstByUsername(String username);
+    Optional<UserAccount> findFirstByUsernameIgnoreCase(String username);
 
     @EntityGraph(attributePaths = {"client"})
-    List<UserAccount> findAllByUsername(String username);
+    List<UserAccount> findAllByUsernameIgnoreCase(String username);
 
     @EntityGraph(attributePaths = {"client"})
-    Optional<UserAccount> findByUsernameAndClientId(String username, Long clientId);
+    Optional<UserAccount> findByUsernameIgnoreCaseAndClientId(String username, Long clientId);
 
     @EntityGraph(attributePaths = {"client"})
     List<UserAccount> findAllByClientId(Long clientId);
