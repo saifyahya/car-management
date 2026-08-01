@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth.service';
 import { LanguageService } from './core/language.service';
@@ -18,6 +18,15 @@ export class AppShellComponent {
   readonly langService = inject(LanguageService);
 
   readonly currentUser = this.auth.currentUser;
+  readonly isMobileMenuOpen = signal(false);
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen.set(false);
+  }
 
   constructor() {
     if (!this.auth.loggedIn()) {

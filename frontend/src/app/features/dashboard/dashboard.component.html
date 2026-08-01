@@ -16,24 +16,49 @@
 @if (stats(); as s) {
   <section class="stats">
     <article class="stat-card" [class.active-filter]="selectedFilter() === 'PARKED'" (click)="setFilter('PARKED')">
-      <span>{{ langService.t('statParked') }}</span>
-      <strong>{{s.parked}}</strong>
+      <div class="stat-info">
+        <span>{{ langService.t('statParked') }}</span>
+        <strong class="text-parked">{{s.parked}}</strong>
+      </div>
+      <div class="stat-icon bg-parked text-parked">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.8l-1.4 2.2C1.5 10.6 1 11.4 1 12.3V16c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+      </div>
     </article>
     <article class="stat-card" [class.active-filter]="selectedFilter() === 'REQUESTED'" (click)="setFilter('REQUESTED')">
-      <span>{{ langService.t('statRequested') }}</span>
-      <strong>{{s.requested}}</strong>
+      <div class="stat-info">
+        <span>{{ langService.t('statRequested') }}</span>
+        <strong class="text-requested">{{s.requested}}</strong>
+      </div>
+      <div class="stat-icon bg-requested text-requested">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
     </article>
     <article class="stat-card" [class.active-filter]="selectedFilter() === 'RETRIEVING'" (click)="setFilter('RETRIEVING')">
-      <span>{{ langService.t('statRetrieving') }}</span>
-      <strong>{{s.retrieving}}</strong>
+      <div class="stat-info">
+        <span>{{ langService.t('statRetrieving') }}</span>
+        <strong class="text-retrieving">{{s.retrieving}}</strong>
+      </div>
+      <div class="stat-icon bg-retrieving text-retrieving">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
     </article>
     <article class="stat-card" [class.active-filter]="selectedFilter() === 'READY'" (click)="setFilter('READY')">
-      <span>{{ langService.t('statReady') }}</span>
-      <strong>{{s.ready}}</strong>
+      <div class="stat-info">
+        <span>{{ langService.t('statReady') }}</span>
+        <strong class="text-ready">{{s.ready}}</strong>
+      </div>
+      <div class="stat-icon bg-ready text-ready">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
     </article>
     <article class="stat-card" [class.active-filter]="selectedFilter() === 'DELIVERED'" (click)="setFilter('DELIVERED')">
-      <span>{{ langService.t('statDelivered') }}</span>
-      <strong>{{s.delivered}}</strong>
+      <div class="stat-info">
+        <span>{{ langService.t('statDelivered') }}</span>
+        <strong class="text-delivered">{{s.delivered}}</strong>
+      </div>
+      <div class="stat-icon bg-delivered text-delivered">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      </div>
     </article>
   </section>
 }
@@ -49,9 +74,11 @@
         </span>
       }
     </div>
-    <button (click)="load()">{{ langService.t('refreshBtn') }}</button>
+    <button class="desktop-only refresh-btn" (click)="load()">{{ langService.t('refreshBtn') }}</button>
   </div>
-  <div class="table-wrap">
+  
+  <!-- Desktop Table View -->
+  <div class="table-wrap desktop-only">
     <table>
       <thead>
         <tr>
@@ -65,13 +92,13 @@
       </thead>
       <tbody>
         @for (ticket of tickets(); track ticket.id) {
-          <tr [class.non-parked]="ticket.status !== 'PARKED'" [class]="'status-' + ticket.status.toLowerCase()">
+          <tr [class.non-parked]="ticket.status !== 'PARKED'" [class]="'status-' + ticket.status.toLowerCase()" [routerLink]="['/tickets', ticket.id]" class="clickable-row">
             <td>{{ticket.ticketNumber}}</td>
             <td>{{ticket.color}} {{ticket.make}} {{ticket.model}}</td>
             <td>{{ticket.plateNumber}}</td>
             <td>{{ticket.parkingLocation || '—'}}</td>
             <td><app-status-badge [status]="ticket.status" /></td>
-            <td><a [routerLink]="['/tickets', ticket.id]">{{ langService.t('openBtn') }}</a></td>
+            <td><span class="open-link-text">{{ langService.t('openBtn') }}</span></td>
           </tr>
         } @empty {
           <tr>
@@ -82,16 +109,37 @@
     </table>
   </div>
 
+  <!-- Mobile List View -->
+  <div class="mobile-list mobile-only">
+    @for (ticket of tickets(); track ticket.id) {
+      <div class="ticket-card" [routerLink]="['/tickets', ticket.id]">
+        <div class="ticket-image">🚘</div>
+        <div class="ticket-content">
+          <div class="ticket-header">
+            <h4>{{ticket.make}} {{ticket.model}}</h4>
+            <app-status-badge [status]="ticket.status" />
+          </div>
+          <div class="ticket-meta">
+            <span class="time-label">{{ticket.checkedInAt | date:'shortTime'}}</span>
+          </div>
+        </div>
+        <div class="ticket-chevron">❯</div>
+      </div>
+    } @empty {
+      <div class="empty-state">{{ langService.t('noVehicles') }}</div>
+    }
+  </div>
+
   @if (totalPages() > 1 || totalElements() > 0) {
     <div class="pagination-bar">
       <button type="button" class="page-btn" (click)="prevPage()" [disabled]="currentPage() === 0">
-        ◀ {{ langService.t('lblPrevious') }}
+        {{ langService.lang() === 'ar' ? '▶' : '◀' }} {{ langService.t('lblPrevious') }}
       </button>
       <span class="page-info">
-        {{ langService.t('lblPage') }} {{ currentPage() + 1 }} {{ langService.t('lblOf') }} {{ totalPages() }} ({{ totalElements() }} total)
+        {{ langService.t('lblPage') }} {{ currentPage() + 1 }} {{ langService.t('lblOf') }} {{ totalPages() }} ({{ totalElements() }})
       </span>
       <button type="button" class="page-btn" (click)="nextPage()" [disabled]="isLastPage() || currentPage() >= totalPages() - 1">
-        {{ langService.t('lblNext') }} ▶
+        {{ langService.t('lblNext') }} {{ langService.lang() === 'ar' ? '◀' : '▶' }}
       </button>
     </div>
   }

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ValetApiService } from '../../core/valet-api.service';
 import { Dashboard, Ticket } from '../../core/models';
@@ -9,7 +10,7 @@ import { WebPushService } from '../../core/web-push.service';
 
 @Component({
   standalone: true,
-  imports: [RouterLink, PageHeaderComponent, StatusBadgeComponent],
+  imports: [RouterLink, PageHeaderComponent, StatusBadgeComponent, DatePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

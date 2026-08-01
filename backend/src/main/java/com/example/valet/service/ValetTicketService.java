@@ -152,7 +152,7 @@ public class ValetTicketService {
         if (t.getStatus() != TicketStatus.REQUESTED)
             throw new IllegalStateException("Only requested tickets can be assigned");
         t.setAssignedTo(r.assignedTo());
-        t.setStatus(TicketStatus.ASSIGNED);
+        t.setStatus(TicketStatus.RETRIEVING);
         t.setUpdatedBy(SecurityUtils.getCurrentUsername());
         return TicketResponse.from(t);
     }

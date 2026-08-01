@@ -44,9 +44,7 @@
     <section class="card">
         <h2>{{ langService.t('secActions') }}</h2>
         <div class="actions">@if(t.status==='REQUESTED'){<button (click)="openAssignModal()" [disabled]="loading()">{{
-                langService.t('btnAssignValet') }}</button>}@if(t.status==='ASSIGNED'){<button
-                (click)="move('RETRIEVING')" [disabled]="loading()">{{ langService.t('btnStartRetrieval')
-                }}</button>}@if(t.status==='RETRIEVING'){<button (click)="move('READY')" [disabled]="loading()">{{
+                langService.t('btnAssignValet') }}</button>}@if(t.status==='RETRIEVING'){<button (click)="move('READY')" [disabled]="loading()">{{
                 langService.t('btnMarkReady') }}</button>}@if(t.status==='READY'){<button (click)="move('DELIVERED')" [disabled]="loading()">{{
                 langService.t('btnConfirmDelivery') }}</button>}@if(t.status==='PARKED'){<p>{{
                 langService.t('msgWaitingVisitor') }}</p>}@if(t.status==='DELIVERED'){<p>{{
