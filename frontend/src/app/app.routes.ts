@@ -11,6 +11,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/public-ticket/public-ticket.component').then(m => m.PublicTicketComponent)
   },
   {
+    path: 'me',
+    canActivate: [authGuard],
+    redirectTo: 'dashboard'
+  },
+  {
     path: '',
     loadComponent: () => import('./app-shell.component').then(m => m.AppShellComponent),
     canActivate: [authGuard],

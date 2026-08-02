@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Router } from '@angular/router';
+import { Observable, tap, EMPTY } from 'rxjs';
 import { UserRole } from './models';
 
 export interface AuthResponse {
@@ -14,6 +15,7 @@ export interface AuthResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly tokenKey = 'valet_jwt_token';
 
   readonly loggedIn = signal(!!localStorage.getItem(this.tokenKey));
@@ -32,6 +34,10 @@ export class AuthService {
   }
 
   fetchCurrentUser(): Observable<AuthResponse> {
+    if (!this.loggedIn()) {
+      this.router.navigateByUrl('/login');
+      return EMPTY;
+    }
     return this.http.get<AuthResponse>('/api/auth/me').pipe(
       tap(res => this.currentUser.set(res))
     );
